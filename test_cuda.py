@@ -29,7 +29,7 @@ print(device)
 import numpy as np
 
 labels = np.zeros(
-    (len(trec), max(trec['label-coarse']+1))
+    (len(trec), max(trec['label-coarse'])+1)
 )
 # one-hot encode
 labels[np.arange(len(trec)), trec['label-coarse']] = 1
@@ -85,7 +85,7 @@ for batch in loop:
     batch_mps = {
         'input_ids': batch['input_ids'].to(device),
         'attention_mask': batch['attention_mask'].to(device),
-        'labels': batch['labels'].to(device)
+        'labels': batch['labels'].type(torch.float32).to(device)
     }
     t0 = time()
 
