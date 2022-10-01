@@ -85,7 +85,7 @@ for batch in loop:
     batch_mps = {
         'input_ids': batch['input_ids'].to(device),
         'attention_mask': batch['attention_mask'].to(device),
-        'labels': batch['labels'].type(torch.float32).to(device)
+        'labels': batch['labels'].type(torch.float).to(device)
     }
     t0 = time()
 
