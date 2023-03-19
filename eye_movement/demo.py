@@ -107,14 +107,14 @@ if __name__ == "__main__":
         if left_pupil != None and right_pupil != None:
             close_count = 0
 
-            # cv2.putText(frame, "Detect pupils, you can click", (15, 50), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
+            cv2.putText(frame, "Normal Operation", (15, 50), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
 
             if gaze.is_blinking():
                 text = "Blinking"
                 click_flag = click_flag ^ 1
                 click_time = time.time()
                 # pyautogui.click()
-                pyautogui.sleep(0.5)
+                # pyautogui.sleep(0.5)
 
             if time.time() - click_time > 10:
                 cv2.putText(frame, "Eyes Open too long!", (200, 20),
