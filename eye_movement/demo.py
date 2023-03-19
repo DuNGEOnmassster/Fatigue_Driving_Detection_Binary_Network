@@ -33,6 +33,7 @@ predictor = dlib.shape_predictor(args.model_path)
 click_flag = 0
 close_count = 0
 Mouse_flag = False
+click_time = time.time()
 # grab the indexes of the facial landmarks for the mouth
 (mStart, mEnd) = (49, 68)
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
             print(f"rects = {rects}")
             # get mouth
             if len(rects) > 0:
-                cv2.putText(frame, "Detect mouth, you can draw", (15, 85), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
+                # cv2.putText(frame, "Detect mouth, you can draw", (15, 85), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
 
                 shape = predictor(gray, rects[0])
                 shape = face_utils.shape_to_np(shape)
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 # Draw text if mouth is open
                 if mar > args.MAR_THRESH:
-                    cv2.putText(frame, "Mouse state changed!", (800, 20),
+                    cv2.putText(frame, "Yawn!", (300, 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                     if Mouse_flag:
                         Mouse_flag = False
@@ -106,17 +107,29 @@ if __name__ == "__main__":
         if left_pupil != None and right_pupil != None:
             close_count = 0
 
-            cv2.putText(frame, "Detect pupils, you can click", (15, 50), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
+            # cv2.putText(frame, "Detect pupils, you can click", (15, 50), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
 
             if gaze.is_blinking():
                 text = "Blinking"
                 click_flag = click_flag ^ 1
+                click_time = time.time()
                 # pyautogui.click()
                 pyautogui.sleep(0.5)
+
+            if time.time() - click_time > 10:
+                cv2.putText(frame, "Eyes Open too long!", (200, 20),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
+
                     
         else:
+            cv2.putText(frame, "Eyes Closed!", (0, 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             close_count += 1
             Mouse_message = "Not Painting"
+            if close_count > 10:
+                cv2.putText(frame, "Eyes Closed too long!", (100, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
+                click_time = time.time()
         
         if Mouse_flag:
             Mouse_message = "Painting"
@@ -126,6 +139,7 @@ if __name__ == "__main__":
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"Watch Time: {(time.time() - click_time):.3f} s", (20, 280), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         # cv2.line(frame, left_pupil, right_pupil, (0,0,255), 1, 8)
         cv2.imshow('Eye Controlled Mouse', frame)
         cv2.waitKey(1)
