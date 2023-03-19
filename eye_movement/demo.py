@@ -7,6 +7,7 @@ import imutils
 import argparse
 from imutils import face_utils
 from gaze_tracking.mouth import mouth_aspect_ratio
+import time
 
 
 def parse_args():
@@ -65,7 +66,7 @@ if __name__ == "__main__":
                 if id == 1:
                     screen_x = screen_w * landmark.x
                     screen_y = screen_h * landmark.y
-                    pyautogui.moveTo(screen_x, screen_y)
+                    # pyautogui.moveTo(screen_x, screen_y)
 
             left = [landmarks[145], landmarks[159]]
             for landmark in left:
@@ -96,11 +97,11 @@ if __name__ == "__main__":
                     if Mouse_flag:
                         Mouse_flag = False
                         pyautogui.sleep(0.5)
-                        pyautogui.mouseUp()
+                        # pyautogui.mouseUp()
                     else:
                         Mouse_flag = True
                         pyautogui.sleep(0.5)
-                        pyautogui.mouseDown()
+                        # pyautogui.mouseDown()
 
         if left_pupil != None and right_pupil != None:
             close_count = 0
@@ -110,7 +111,7 @@ if __name__ == "__main__":
             if gaze.is_blinking():
                 text = "Blinking"
                 click_flag = click_flag ^ 1
-                pyautogui.click()
+                # pyautogui.click()
                 pyautogui.sleep(0.5)
                     
         else:
@@ -124,6 +125,7 @@ if __name__ == "__main__":
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         # cv2.line(frame, left_pupil, right_pupil, (0,0,255), 1, 8)
         cv2.imshow('Eye Controlled Mouse', frame)
         cv2.waitKey(1)
