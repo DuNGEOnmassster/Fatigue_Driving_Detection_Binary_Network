@@ -43,12 +43,12 @@ def mkdirs(newdir):
             raise
 
 
-def save_model(model, epoch, lr, optimzer, accuracy):
+def save_model(model, epoch, lr, optimzer):
     save_dir = os.path.join(cfg.save_dir, cfg.exp_name)
     if not os.path.exists(save_dir):
         mkdirs(save_dir)
-    save_path = os.path.join(save_dir, 'sleep_class_{}-{:.3f}.pth'.format(epoch, accuracy))
-    print('Saving to {}.'.format(save_path))
+    save_path = os.path.join(save_dir, f'LR_{epoch}.pth')
+    # print('Saving to {}.'.format(save_path))
     state_dict = {
         'lr': lr,
         'epoch': epoch,
@@ -74,7 +74,7 @@ def train(model, train_loader, train_data, test_data, val_data, scheduler, optim
     losses = AverageMeter(max=100)
     model.train()
     # scheduler.step()
-    print('Epoch: {} : LR = {}'.format(epoch, scheduler.get_lr()))
+    # print('Epoch: {} : LR = {}'.format(epoch, scheduler.get_lr()))
     for i, data in enumerate(train_loader):
         train_step += 1
         DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -92,8 +92,8 @@ def train(model, train_loader, train_data, test_data, val_data, scheduler, optim
         losses.update(loss.item())
         gc.collect()
 
-        if i % cfg.display_freq == 0:
-            print("({:d} / {:d}), loss: {:.3f}".format(i, len(train_loader), loss.item()))
+        # if i % cfg.display_freq == 0:
+            # print("({:d} / {:d}), loss: {:.3f}".format(i, len(train_loader), loss.item()))
 
     if epoch % cfg.save_freq == 0:
         labels_test = test_data[:, 0].long()
@@ -119,10 +119,10 @@ def train(model, train_loader, train_data, test_data, val_data, scheduler, optim
         print("accuracy_train: {}; accuracy_val: {}; accuracy_test: {}"
               .format(accuracy_train, accuracy_val, accuracy_test))
 
-    # if epoch % cfg.save_freq == 0:
-    #     save_model(model, epoch, scheduler.get_lr(), optimizer)
+    if epoch % cfg.save_freq == 0:
+        save_model(model, epoch, scheduler.get_lr(), optimizer)
 
-    print('Training Loss: {}'.format(losses.avg))
+    # print('Training Loss: {}'.format(losses.avg))
 
 
 def main():

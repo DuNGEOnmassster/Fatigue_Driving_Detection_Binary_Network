@@ -4,8 +4,8 @@ import os
 
 config = EasyDict()
 
-config.gpu = "1"
-os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu
+# config.gpu = "1"
+# os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu
 
 # dataloader jobs number
 config.num_workers = 0
@@ -14,7 +14,7 @@ config.num_workers = 0
 config.batch_size = 64
 
 # training epoch number
-config.max_epoch = 1000
+config.max_epoch = 10000
 
 config.start_epoch = 0
 
@@ -24,10 +24,10 @@ config.momentum = 0.9
 config.optim = "SGD"
 
 # using GPU
-config.cuda = True
+config.cuda = False
 config.resume = None
 config.display_freq = 5
-config.save_freq = 1
+config.save_freq = 100
 config.save_dir = "./model"
 config.exp_name = "sleep1"
 
