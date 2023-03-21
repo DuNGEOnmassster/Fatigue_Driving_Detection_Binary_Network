@@ -4,8 +4,8 @@ import os
 
 config = EasyDict()
 
-config.gpu = "0"
-os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu
+# config.gpu = "0"
+# os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu
 
 # dataloader jobs number
 config.num_workers = 0
@@ -24,7 +24,7 @@ config.momentum = 0.9
 config.optim = "SGD"
 
 # using GPU
-config.cuda = True
+config.cuda = False
 config.resume = None
 config.display_freq = 10
 config.save_freq = 1

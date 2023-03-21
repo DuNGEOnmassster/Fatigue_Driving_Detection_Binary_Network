@@ -17,6 +17,8 @@ from util.misc import mkdirs, to_device
 from util.shedule import FixLR
 import matplotlib.pyplot as plt
 import xlrd
+xlrd.xlsx.ensure_elementtree_imported(False, None)
+xlrd.xlsx.Element_has_iter = True
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
@@ -48,8 +50,8 @@ def save_model(model, epoch, lr, optimzer, accuracy):
     save_dir = os.path.join(cfg.save_dir, cfg.exp_name)
     if not os.path.exists(save_dir):
         mkdirs(save_dir)
-    save_path = os.path.join(save_dir, 'sleep_class_{}-{:.3f}.pth'.format(epoch, accuracy))
-    print('Saving to {}.'.format(save_path))
+    save_path = os.path.join(save_dir, f'FC-{epoch:.3f}.pth')
+    # print('Saving to {}.'.format(save_path))
     state_dict = {
         'lr': lr,
         'epoch': epoch,
@@ -123,7 +125,7 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
     losses = AverageMeter(max=100)
     model.train()
     # scheduler.step()
-    print('Epoch: {} : LR = {}'.format(epoch, scheduler.get_lr()))
+    # print('Epoch: {} : LR = {}'.format(epoch, scheduler.get_lr()))
     for i, data in enumerate(train_loader):
         train_step += 1
         data = to_device(data)
@@ -141,8 +143,8 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
         losses.update(loss.item())
         gc.collect()
 
-        if i % cfg.display_freq == 0:
-            print("({:d} / {:d}), loss: {:.3f}".format(i, len(train_loader), loss.item()))
+        # if i % cfg.display_freq == 0:
+            # print("({:d} / {:d}), loss: {:.3f}".format(i, len(train_loader), loss.item()))
 
     if epoch % cfg.save_freq == 0:
         labels_test = test_data[:, 0].long()
