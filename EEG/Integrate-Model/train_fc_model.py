@@ -46,11 +46,11 @@ def mkdirs(newdir):
             raise
 
 
-def save_model(model, epoch, lr, optimzer, accuracy):
+def save_model(model, epoch, lr, optimzer):
     save_dir = os.path.join(cfg.save_dir, cfg.exp_name)
     if not os.path.exists(save_dir):
         mkdirs(save_dir)
-    save_path = os.path.join(save_dir, f'FC-{epoch:.3f}.pth')
+    save_path = os.path.join(save_dir, f'FC_{epoch}.pth')
     # print('Saving to {}.'.format(save_path))
     state_dict = {
         'lr': lr,
@@ -164,8 +164,8 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
         print("accuracy_val: {}; accuracy_test: {}"
               .format(accuracy_val, accuracy_test))
 
-    # if epoch % cfg.save_freq == 0:
-    #     save_model(model, epoch, scheduler.get_lr(), optimizer)
+    if epoch % cfg.save_freq == 0:
+        save_model(model, epoch, scheduler.get_lr(), optimizer)
 
     print('Training Loss: {}'.format(losses.avg))
 

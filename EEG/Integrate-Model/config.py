@@ -14,7 +14,7 @@ config.num_workers = 0
 config.batch_size = 64
 
 # training epoch number
-config.max_epoch = 1500
+config.max_epoch = 10000
 
 config.start_epoch = 0
 
@@ -27,7 +27,7 @@ config.optim = "SGD"
 config.cuda = False
 config.resume = None
 config.display_freq = 10
-config.save_freq = 1
+config.save_freq = 100
 config.save_dir = "./model"
 config.exp_name = "sleep1"
 
