@@ -19,7 +19,7 @@ config.max_epoch = 10000
 config.start_epoch = 0
 
 # learning rate
-config.lr = 1e-2
+config.lr = 1e-3
 config.momentum = 0.9
 config.optim = "SGD"
 
@@ -28,6 +28,7 @@ config.cuda = False
 config.resume = None
 config.display_freq = 10
 config.save_freq = 100
+config.print_freq = 10
 config.save_dir = "./model"
 config.exp_name = "sleep1"
 

@@ -161,13 +161,13 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
         correct_val = pred_val.eq(labels_val.data.view_as(pred_val)).cpu().sum()
         accuracy_val = correct_val * 100.0 / labels_val.shape[0]
         accuracy_vals.append(round(accuracy_val.item(), 3))
-        print("accuracy_val: {}; accuracy_test: {}"
-              .format(accuracy_val, accuracy_test))
+        print("Epoch: {}; Train Loss: {}; accuracy_val: {}; accuracy_test: {}"
+              .format(epoch, losses.avg, accuracy_val, accuracy_test))
 
     if epoch % cfg.save_freq == 0:
-        save_model(model, epoch, scheduler.get_lr(), optimizer)
+        save_model(model, epoch, scheduler.get_last_lr(), optimizer)
 
-    print('Training Loss: {}'.format(losses.avg))
+    # print('Training Loss: {}'.format(losses.avg))
 
 
 
@@ -206,8 +206,8 @@ def main():
 
     print('Start training sleep model.')
     for epoch in range(cfg.start_epoch, cfg.start_epoch + cfg.max_epoch+1):
-        scheduler.step()
         train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
+        scheduler.step()
 
     index = np.argsort(np.array(accuracy_vals))[::-1][:10]
     pred_slect = np.array(pred_np)[:,:,0][index]
@@ -224,8 +224,8 @@ def main():
 
 
 if __name__ == "__main__":
-    np.random.seed(2020)
-    torch.manual_seed(2020)
+    np.random.seed(3407)
+    torch.manual_seed(3407)
     # parse arguments
     print_config(cfg)
 
