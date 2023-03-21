@@ -1,5 +1,7 @@
 import os
 import xlrd
+xlrd.xlsx.ensure_elementtree_imported(False, None)
+xlrd.xlsx.Element_has_iter = True
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
