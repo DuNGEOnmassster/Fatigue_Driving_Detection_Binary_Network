@@ -11,6 +11,7 @@ from torch.optim import lr_scheduler
 import errno
 
 from model import SleepModel
+# from model2 import SleepModel
 from config import config as cfg, print_config
 from util.misc import AverageMeter
 from util.misc import mkdirs, to_device
@@ -193,7 +194,7 @@ def main():
         cudnn.benchmark = True
 
     if cfg.resume:
-        load_model(model, cfg.resume)
+        load_model(model, cfg.pretrained_model)
     
     lr = cfg.lr
     moment = cfg.momentum

@@ -25,12 +25,14 @@ config.optim = "SGD"
 
 # using GPU
 config.cuda = False
-config.resume = None
+config.resume = True
 config.display_freq = 10
 config.save_freq = 100
 config.print_freq = 10
 config.save_dir = "./model"
 config.exp_name = "sleep1"
+
+config.pretrained_model = "./model/FC_10000.pth"
 
 config.device = torch.device('cuda') if config.cuda else torch.device('cpu')
 
