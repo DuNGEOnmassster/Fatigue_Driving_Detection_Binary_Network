@@ -93,7 +93,7 @@ class DataLoad(object):
     def __init__(self):
         X, Y = loadData('sleepdata.xlsx')
         data_X = preprocessing.StandardScaler().fit_transform(X)
-        random_seed = 3407  # 2020, 0, 1997
+        random_seed = cfg.random_seed  # 2020, 0, 1997
         X_train, X_test, y_train, y_test = train_test_split(data_X, Y, test_size=0.5, random_state=random_seed,
                                                             shuffle=True)
 
@@ -150,6 +150,13 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
 
     if epoch % cfg.save_freq == 0:
         model.eval()
+
+        labels_train = data[:, 0].long()
+        output_train = model(data[:, 1:])
+        pred_train = output_train.data.max(1, keepdim=True)[1]
+        correct_train = pred_train.eq(labels_train.data.view_as(pred_train)).cpu().sum()
+        accuracy_train = correct_train*100.0/labels_train.shape[0]
+
         labels_test = test_data[:, 0].long()
         output_test = model(test_data[:, 1:])
         pred_test = output_test.data.max(1, keepdim=True)[1]
@@ -164,8 +171,8 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
         correct_val = pred_val.eq(labels_val.data.view_as(pred_val)).cpu().sum()
         accuracy_val = correct_val * 100.0 / labels_val.shape[0]
         accuracy_vals.append(round(accuracy_val.item(), 3))
-        print("Epoch: {}; Train Loss: {}; accuracy_val: {}; accuracy_test: {}; lr: {}"
-              .format(epoch, losses.avg, accuracy_val, accuracy_test, lr))
+        print(f"Epoch: {epoch}; Train Loss: {losses.avg:.5f}; \
+            accuracy_train: {accuracy_train:.3f}; accuracy_val: {accuracy_val:.3f}; accuracy_test: {accuracy_test:.3f}; lr: {lr}")
 
     if epoch % cfg.save_freq == 0:
         save_model(model, epoch, scheduler.get_last_lr(), optimizer)

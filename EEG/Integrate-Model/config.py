@@ -19,7 +19,7 @@ config.max_epoch = 1000
 config.start_epoch = 0
 
 # learning rate
-config.lr = 1e-4
+config.lr = 1e-3
 config.momentum = 0.9
 config.weight_decay = 5e-4
 config.optim = "Adam"
@@ -30,11 +30,13 @@ config.resume = True
 config.display_freq = 10
 config.save_freq = 10
 config.print_freq = 10
+config.random_seed = 3407
+
 config.save_dir = "./model"
 config.exp_name = "sleep1"
 
 config.pretrained_model = "./model/FC_best.pth"
-# config.pretrained_model = "./model/sleep1/FC_510.pth"
+# config.pretrained_model = "./model/sleep1/FC_100.pth"
 
 config.device = torch.device('cuda') if config.cuda else torch.device('cpu')
 

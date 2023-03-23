@@ -8,7 +8,7 @@ from train_fc_model import DataLoad, load_model
 
 def init_test(test_model):
     all_data = DataLoad()
-    test_data = torch.from_numpy(all_data.val_data).float().to(cfg.device)
+    test_data = torch.from_numpy(all_data.test_data).float().to(cfg.device)
     # print(test_data.shape)
     model = SleepModel(5, is_training=True)
 
