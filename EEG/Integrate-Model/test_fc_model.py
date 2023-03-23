@@ -1,20 +1,8 @@
-import os
-import gc
-import time
 import torch
-import torch.nn.functional as F
-import numpy as np
-import torch.nn as nn
 import torch.backends.cudnn as cudnn
-import torch.utils.data as data
-from torch.optim import lr_scheduler
-from torch.optim.lr_scheduler import CosineAnnealingLR
-import errno
 
 from model import SleepModel
-# from model2 import SleepModel
 from config import config as cfg
-
 from train_fc_model import DataLoad, load_model
 
 
@@ -37,11 +25,20 @@ def init_test(test_model):
 def test(test_model):
     model, test_data = init_test(test_model)
     model.eval()
+    labels_test = test_data[:, 0].long()
     output = model(test_data[:, 1:])
-    print(output.shape)
+    # print(output.shape)
+    pred_test = output.data.max(1, keepdim=True)[1]
+    # print(pred_test.shape)
+    correct_test = pred_test.eq(labels_test.data.view_as(pred_test)).cpu().sum()
+    # print(correct_test)
+    accuracy_test = correct_test*100.0/labels_test.shape[0]
+    # print(accuracy_test)
+    print(f"Test Acc = {correct_test} / {labels_test.shape[0]}, Acc rate = {correct_test/labels_test.shape[0]}")
+
 
 if __name__ == "__main__":
-    test_model = "./model/sleep1/FC_100.pth"
+    test_model = "./model/sleep1/FC_310.pth"
 
     test(test_model)
 
