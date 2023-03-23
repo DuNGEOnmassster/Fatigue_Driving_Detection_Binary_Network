@@ -8,7 +8,7 @@ from train_fc_model import DataLoad, load_model
 
 def init_test(test_model):
     all_data = DataLoad()
-    test_data = torch.from_numpy(all_data.test_data).float().to(cfg.device)
+    test_data = torch.from_numpy(all_data.val_data).float().to(cfg.device)
     # print(test_data.shape)
     model = SleepModel(5, is_training=True)
 
@@ -32,13 +32,11 @@ def test(test_model):
     # print(pred_test.shape)
     correct_test = pred_test.eq(labels_test.data.view_as(pred_test)).cpu().sum()
     # print(correct_test)
-    accuracy_test = correct_test*100.0/labels_test.shape[0]
-    # print(accuracy_test)
     print(f"Test Acc = {correct_test} / {labels_test.shape[0]}, Acc rate = {correct_test/labels_test.shape[0]}")
 
 
 if __name__ == "__main__":
-    test_model = "./model/sleep1/FC_310.pth"
+    test_model = "./model/FC_best.pth"
 
     test(test_model)
 
