@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.utils.data as data
 from torch.optim import lr_scheduler
+from torch.optim.lr_scheduler import CosineAnnealingLR
 import errno
 
 from model import SleepModel
@@ -92,7 +93,7 @@ class DataLoad(object):
     def __init__(self):
         X, Y = loadData('sleepdata.xlsx')
         data_X = preprocessing.StandardScaler().fit_transform(X)
-        random_seed = 2020  # 2020, 0, 1997
+        random_seed = 3407  # 2020, 0, 1997
         X_train, X_test, y_train, y_test = train_test_split(data_X, Y, test_size=0.5, random_state=random_seed,
                                                             shuffle=True)
 
@@ -148,6 +149,7 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
             # print("({:d} / {:d}), loss: {:.3f}".format(i, len(train_loader), loss.item()))
 
     if epoch % cfg.save_freq == 0:
+        model.eval()
         labels_test = test_data[:, 0].long()
         output_test = model(test_data[:, 1:])
         pred_test = output_test.data.max(1, keepdim=True)[1]
@@ -162,11 +164,17 @@ def train(model, train_loader, test_data, val_data, scheduler, optimizer, epoch)
         correct_val = pred_val.eq(labels_val.data.view_as(pred_val)).cpu().sum()
         accuracy_val = correct_val * 100.0 / labels_val.shape[0]
         accuracy_vals.append(round(accuracy_val.item(), 3))
-        print("Epoch: {}; Train Loss: {}; accuracy_val: {}; accuracy_test: {}"
-              .format(epoch, losses.avg, accuracy_val, accuracy_test))
+        print("Epoch: {}; Train Loss: {}; accuracy_val: {}; accuracy_test: {}; lr: {}"
+              .format(epoch, losses.avg, accuracy_val, accuracy_test, lr))
 
     if epoch % cfg.save_freq == 0:
         save_model(model, epoch, scheduler.get_last_lr(), optimizer)
+    
+        if os.path.exists(f"./model/sleep1/FC_{epoch-500}.pth"):
+            os.system(f"rm ./model/sleep1/FC_{epoch-500}.pth")
+
+    # if epoch % cfg.print_freq == 0:
+    #     print(f"pred_np shape = {pred_np}")
 
     # print('Training Loss: {}'.format(losses.avg))
 
@@ -199,11 +207,12 @@ def main():
     lr = cfg.lr
     moment = cfg.momentum
     if cfg.optim == "Adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=cfg.weight_decay)
     else:
         optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=moment)
 
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.90)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.90)
+    scheduler = CosineAnnealingLR(optimizer, T_max=15000)
 
     print('Start training sleep model.')
     for epoch in range(cfg.start_epoch, cfg.start_epoch + cfg.max_epoch+1):
@@ -215,9 +224,11 @@ def main():
 
 
     with open("FC_result.txt", "w") as fn:
+        print("Write gt")
         fn.write("gt,"+",".join([str(int(i)) for i in test_data.cpu().numpy()[:,0]])+"\n")
         for pn in pred_slect:
             fn.write("fc," + ",".join([str(i) for i in pn]) + "\n")
+        print("update FC_result.txt")
 
 
     if torch.cuda.is_available():
