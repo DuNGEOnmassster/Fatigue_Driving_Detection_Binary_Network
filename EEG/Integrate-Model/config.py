@@ -34,7 +34,7 @@ config.save_dir = "./model"
 config.exp_name = "sleep1"
 
 config.pretrained_model = "./model/FC_best.pth"
-# config.pretrained_model = "./model/sleep1/FC_100.pth"
+# config.pretrained_model = "./model/sleep1/FC_510.pth"
 
 config.device = torch.device('cuda') if config.cuda else torch.device('cpu')
 
