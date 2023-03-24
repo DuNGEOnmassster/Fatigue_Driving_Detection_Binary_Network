@@ -94,10 +94,10 @@ class DataLoad(object):
         X, Y = loadData('sleepdata.xlsx')
         data_X = preprocessing.StandardScaler().fit_transform(X)
         random_seed = cfg.random_seed  # 2020, 0, 1997
-        X_train, X_test, y_train, y_test = train_test_split(data_X, Y, test_size=0.5, random_state=random_seed,
+        X_train, X_test, y_train, y_test = train_test_split(data_X, Y, test_size=0.2, random_state=random_seed,
                                                             shuffle=True)
 
-        X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.8, random_state=random_seed,
+        X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=random_seed,
                                                         shuffle=True)
         self.val_data = np.concatenate([np.expand_dims(y_val,axis=1), X_val], axis=1)
         # this.val_data=np.concatenate([torch.tensor(y_val).unsqueeze(-1).numpy(), X_val], axis=1);
@@ -105,6 +105,8 @@ class DataLoad(object):
         self.test_data = np.concatenate([np.expand_dims(y_test, axis=1), X_test], axis=1)
 
         self.train_data = np.concatenate([np.expand_dims(y_train, axis=1), X_train], axis=1)
+
+        # import pdb; pdb.set_trace()
 
     def __getitem__(self, item):
 
