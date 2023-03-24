@@ -19,7 +19,7 @@ config.max_epoch = 1000
 config.start_epoch = 0
 
 # learning rate
-config.lr = 1e-3
+config.lr = 1e-4
 config.momentum = 0.9
 config.weight_decay = 5e-4
 config.optim = "Adam"

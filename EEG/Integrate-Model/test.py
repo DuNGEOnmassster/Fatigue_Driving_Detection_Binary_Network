@@ -3,7 +3,7 @@ import torch.backends.cudnn as cudnn
 
 from model import SleepModel
 from config import config as cfg
-from train_fc_model import DataLoad, load_model
+from train import DataLoad, load_model
 
 
 def init_test(test_model):
