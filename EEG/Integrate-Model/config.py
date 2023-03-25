@@ -11,7 +11,7 @@ config = EasyDict()
 config.num_workers = 0
 
 # batch_size
-config.batch_size = 64
+config.batch_size = 256
 
 # training epoch number
 config.max_epoch = 1000
@@ -19,9 +19,9 @@ config.max_epoch = 1000
 config.start_epoch = 0
 
 # learning rate
-config.lr = 1e-4
+config.lr = 1e-3
 config.momentum = 0.9
-config.weight_decay = 5e-4
+config.weight_decay = 5e-6
 config.optim = "Adam"
 
 # using GPU
@@ -30,13 +30,13 @@ config.resume = True
 config.display_freq = 10
 config.save_freq = 10
 config.print_freq = 10
-config.random_seed = 3407
+config.random_seed = 0
 
 config.save_dir = "./model"
 config.exp_name = "sleep1"
 
-config.pretrained_model = "./model/FC_best.pth"
-# config.pretrained_model = "./model/sleep1/FC_100.pth"
+# config.pretrained_model = "./model/FC_best.pth"
+config.pretrained_model = "./model/sleep1/FC_1000.pth"
 
 config.device = torch.device('cuda') if config.cuda else torch.device('cpu')
 

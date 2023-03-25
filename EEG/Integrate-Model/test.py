@@ -8,7 +8,7 @@ from train import DataLoad, load_model
 
 def init_test(test_model):
     all_data = DataLoad()
-    test_data = torch.from_numpy(all_data.val_data).float().to(cfg.device)
+    test_data = torch.from_numpy(all_data.test_data).float().to(cfg.device)
     # print(test_data.shape)
     model = SleepModel(5, is_training=True)
 
@@ -38,7 +38,8 @@ def test(test_model):
 
 
 if __name__ == "__main__":
-    test_model = "./model/FC_best.pth"
+    test_model = "./model/sleep1/FC_700.pth"
+    # test_model = "./model/FC_best.pth"
 
     test(test_model)
 
