@@ -69,19 +69,28 @@ def get_fatigue_weight(count, weight_type):
         weight = max_label
 
     if weight_type == "Mean":
-        sum_mul = 1
+        sum_mul = 0
         for key in count.keys():
             sum_mul = sum_mul + key * count[key]
         mean_label = sum_mul / sum(count.values())
         weight = mean_label
 
     if weight_type == "Select":
+        sort_num = 3
+        sum_mul = 0
+        sum_value = 0
         sort_keys = (sorted(count, key=count.get))
-        max_label = sort_keys[-1]
-        print(max_label)
+        # print(sort_keys)
+        max_labels = sort_keys[-1*sort_num:]
+        # print(max_labels)
+        for key in max_labels:
+            sum_mul = sum_mul + key * count[key]
+            sum_value = sum_value + count[key]
+        mean_select_label = sum_mul / sum_value
+        weight = mean_select_label
 
 
-    return None
+    return weight
 
 
 def inference(test_model):
@@ -94,6 +103,7 @@ def inference(test_model):
     count = pred_count(pred_test)
     # print(count)
     eeg_weight = get_fatigue_weight(count, "Select")
+    print(eeg_weight)
 
 
 if __name__ == "__main__":
