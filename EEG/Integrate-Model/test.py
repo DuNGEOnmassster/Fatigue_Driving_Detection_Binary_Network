@@ -34,12 +34,32 @@ def test(test_model):
     # print(correct_test)
     print(f"Test Acc = {correct_test} / {labels_test.shape[0]}, Acc rate = {correct_test/labels_test.shape[0]}")
 
+
+def get_inferdata(test_model):
+    _, test_data = init_test(test_model)
+    test_data = test_data[:, 1:]
+
+    return test_data
+
+
+def pred_count(pred_test):
     
 
 
-if __name__ == "__main__":
-    test_model = "./model/sleep1/FC_700.pth"
-    # test_model = "./model/FC_best.pth"
+def inference(test_model):
+    model, test_data = init_test(test_model)
+    infer_data = get_inferdata(test_model)
+    model.eval()
+    output = model(infer_data)
+    # print(output.shape)
+    pred_test = output.data.max(1, keepdim=True)[1]
+    print(pred_test)
 
-    test(test_model)
+
+if __name__ == "__main__":
+    # test_model = "./model/sleep1/FC_700.pth"
+    test_model = "./model/FC_best.pth"
+
+    # test(test_model)
+    inference(test_model)
 
