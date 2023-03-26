@@ -63,9 +63,25 @@ def pred_count(pred_test):
     return count
 
 
-def trans_fatigue_level(count):
-    max_label = max(count, key=count.get)
+def get_fatigue_weight(count, weight_type):
+    if weight_type == "Max":
+        max_label = max(count, key=count.get)
+        weight = max_label
 
+    if weight_type == "Mean":
+        sum_mul = 1
+        for key in count.keys():
+            sum_mul = sum_mul + key * count[key]
+        mean_label = sum_mul / sum(count.values())
+        weight = mean_label
+
+    if weight_type == "Select":
+        sort_keys = (sorted(count, key=count.get))
+        max_label = sort_keys[-1]
+        print(max_label)
+
+
+    return None
 
 
 def inference(test_model):
@@ -77,7 +93,7 @@ def inference(test_model):
     # print(pred_test)
     count = pred_count(pred_test)
     # print(count)
-    trans_fatigue_level(count)
+    eeg_weight = get_fatigue_weight(count, "Select")
 
 
 if __name__ == "__main__":
