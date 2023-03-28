@@ -110,6 +110,6 @@ if __name__ == "__main__":
     # test_model = "./model/sleep1/FC_700.pth"
     test_model = "./model/FC_best.pth"
 
-    # test(test_model)
-    inference(test_model)
+    test(test_model)
+    # inference(test_model)
 

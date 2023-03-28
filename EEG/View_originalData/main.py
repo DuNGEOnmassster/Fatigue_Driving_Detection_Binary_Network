@@ -38,7 +38,7 @@ def loadData(filename):#加载数据，一行行的存入列表
 
 
 if __name__ == '__main__':
-    seed(1)
+    seed(3407)
     Color = ["red", "blue", "yellow", "green", "black"]
     X, Y = loadData('./sleepdata.xlsx')
     X_embedded = manifold.TSNE(n_components=2).fit_transform(X)
