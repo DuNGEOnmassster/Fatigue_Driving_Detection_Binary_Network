@@ -17,27 +17,81 @@ def parse_args():
                         help="path of pretrained model for shape predictor")
     parser.add_argument("--MAR_THRESH", type=float, default=0.79,
                         help="thresh of MAR")
+    parser.add_argument("--mStart", type=int, default=49,
+                        help="start index of the facial landmarks for the mouth")
+    parser.add_argument("--mEnd", type=int, default=68,
+                        help="end index of the facial landmarks for the mouth")
 
     return parser.parse_args()
 
 
-args = parse_args()
-gaze = GazeTracking()
-webcam = cv2.VideoCapture(0)
+def eye_init():
+    args = parse_args()
+    gaze = GazeTracking()
+    webcam = cv2.VideoCapture(0)
 
-face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
-screen_w, screen_h = pyautogui.size()
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args.model_path)
+    face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
+    screen_w, screen_h = pyautogui.size()
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(args.model_path)
 
-click_flag = 0
-close_count = 0
-Mouse_flag = False
-click_time = time.time()
-# grab the indexes of the facial landmarks for the mouth
-(mStart, mEnd) = (49, 68)
+    click_flag = 0
+    close_count = 0
+    Mouse_flag = False
+    click_time = time.time()
+    return args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time
 
-if __name__ == "__main__":
+
+def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time):
+    landmarks = landmark_points[0].landmark
+    for id, landmark in enumerate(landmarks[474:478]):
+        x = int(landmark.x * frame_w)
+        y = int(landmark.y * frame_h)
+        cv2.circle(frame, (x, y), 3, (0, 255, 0))
+
+        if id == 1:
+            screen_x = screen_w * landmark.x
+            screen_y = screen_h * landmark.y
+            # pyautogui.moveTo(screen_x, screen_y)
+
+    left = [landmarks[145], landmarks[159]]
+    for landmark in left:
+        x = int(landmark.x * frame_w)
+        y = int(landmark.y * frame_h)
+        cv2.circle(frame, (x, y), 3, (0, 255, 255))
+
+    print(f"rects = {rects}")
+    # get mouth
+    if len(rects) > 0:
+        # cv2.putText(frame, "Detect mouth, you can draw", (15, 85), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
+
+        shape = predictor(gray, rects[0])
+        shape = face_utils.shape_to_np(shape)
+
+        mouth = shape[args.mStart:args.mEnd]
+        mouthMAR = mouth_aspect_ratio(mouth)
+        mar = mouthMAR
+        # compute the convex hull for the mouth, then visualize the mouth
+        mouthHull = cv2.convexHull(mouth)
+        # cv2.drawContours(frame, [mouthHull], -1, (0, 255, 0), 1)
+        cv2.putText(frame, "MAR: {:.2f}".format(mar), (650, 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        # Draw text if mouth is open
+        if mar > args.MAR_THRESH:
+            cv2.putText(frame, "Yawn!", (300, 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            if Mouse_flag:
+                Mouse_flag = False
+                pyautogui.sleep(0.5)
+                # pyautogui.mouseUp()
+            else:
+                Mouse_flag = True
+                pyautogui.sleep(0.5)
+                # pyautogui.mouseDown()
+
+
+def eye_movement_process():
+    args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init()
     while True:
         text = ""
         _, frame = webcam.read()
@@ -58,51 +112,8 @@ if __name__ == "__main__":
         right_pupil = gaze.pupil_right_coords()
 
         if landmark_points:
-            landmarks = landmark_points[0].landmark
-            for id, landmark in enumerate(landmarks[474:478]):
-                x = int(landmark.x * frame_w)
-                y = int(landmark.y * frame_h)
-                cv2.circle(frame, (x, y), 3, (0, 255, 0))
+            get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
 
-                if id == 1:
-                    screen_x = screen_w * landmark.x
-                    screen_y = screen_h * landmark.y
-                    # pyautogui.moveTo(screen_x, screen_y)
-
-            left = [landmarks[145], landmarks[159]]
-            for landmark in left:
-                x = int(landmark.x * frame_w)
-                y = int(landmark.y * frame_h)
-                cv2.circle(frame, (x, y), 3, (0, 255, 255))
-
-            print(f"rects = {rects}")
-            # get mouth
-            if len(rects) > 0:
-                # cv2.putText(frame, "Detect mouth, you can draw", (15, 85), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 1)
-
-                shape = predictor(gray, rects[0])
-                shape = face_utils.shape_to_np(shape)
-
-                mouth = shape[mStart:mEnd]
-                mouthMAR = mouth_aspect_ratio(mouth)
-                mar = mouthMAR
-                # compute the convex hull for the mouth, then visualize the mouth
-                mouthHull = cv2.convexHull(mouth)
-                # cv2.drawContours(frame, [mouthHull], -1, (0, 255, 0), 1)
-                cv2.putText(frame, "MAR: {:.2f}".format(mar), (650, 20), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                # Draw text if mouth is open
-                if mar > args.MAR_THRESH:
-                    cv2.putText(frame, "Yawn!", (300, 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                    if Mouse_flag:
-                        Mouse_flag = False
-                        pyautogui.sleep(0.5)
-                        # pyautogui.mouseUp()
-                    else:
-                        Mouse_flag = True
-                        pyautogui.sleep(0.5)
-                        # pyautogui.mouseDown()
 
         if left_pupil != None and right_pupil != None:
             close_count = 0
@@ -143,3 +154,7 @@ if __name__ == "__main__":
         # cv2.line(frame, left_pupil, right_pupil, (0,0,255), 1, 8)
         cv2.imshow('Eye Controlled Mouse', frame)
         cv2.waitKey(1)
+
+
+if __name__ == "__main__":
+    eye_movement_process()
