@@ -1,16 +1,87 @@
-from scipy.io import loadmat
-import pandas as pd
+import torch
+import torch.backends.cudnn as cudnn
 
-mat_path = "./data/dataOut4.mat"
+from model import SleepModel
+from config import config as cfg
+from train import DataLoad, load_model
+from util.bo_classify import get_abtd
 
-mat_data = loadmat(mat_path)
-df = pd.DataFrame(mat_data["temp"][1:])
-label = pd.DataFrame(mat_data["label"])
+## inference
+def get_infer_data(data_path, test_model):
+    # all_data = DataLoad()
+    # test_data = torch.from_numpy(all_data.test_data).float().to(cfg.device)
+    test_data = get_abtd(data_path)
 
-print(df.shape, label.shape)
-print(df)
-name = mat_path.split(".mat")[0] + ".xlsx"
-print(name)
-df.to_excel(f"{name}", index=False)
+    # print(test_data.shape)
+    model = SleepModel(5, is_training=True)
 
-# import pdb; pdb.set_trace()
+    model = model.to(cfg.device)
+    if cfg.cuda:
+        cudnn.benchmark = True
+
+    if cfg.resume:
+        load_model(model, test_model)
+
+    # test_data = test_data[-1:, 1:]
+    # import pdb; pdb.set_trace()
+
+    return model, test_data
+
+
+def pred_count(pred_test):
+    count = {i: 0 for i in range(5)}
+    for i, label in enumerate(pred_test):
+        # print(i, label.item())
+        count[label.item()] += 1
+    return count
+
+
+def get_fatigue_weight(count, weight_type):
+    if weight_type == "Max":
+        max_label = max(count, key=count.get)
+        weight = max_label
+
+    if weight_type == "Mean":
+        sum_mul = 0
+        for key in count.keys():
+            sum_mul = sum_mul + key * count[key]
+        mean_label = sum_mul / sum(count.values())
+        weight = mean_label
+
+    if weight_type == "Select":
+        sort_num = 3
+        sum_mul = 0
+        sum_value = 0
+        sort_keys = (sorted(count, key=count.get))
+        # print(sort_keys)
+        max_labels = sort_keys[-1*sort_num:]
+        # print(max_labels)
+        for key in max_labels:
+            sum_mul = sum_mul + key * count[key]
+            sum_value = sum_value + count[key]
+        mean_select_label = sum_mul / sum_value
+        weight = mean_select_label
+
+    return weight
+
+
+def inference(data_path, test_model):
+    model, infer_data = get_infer_data(data_path, test_model)
+    model.eval()
+    output = model(infer_data.float())
+    # print(output.shape)
+    pred_test = output.data.max(1, keepdim=True)[1]
+    # print(pred_test)
+    count = pred_count(pred_test)
+    # print(count)
+    eeg_weight = get_fatigue_weight(count, "Select")
+    print(eeg_weight)
+    return eeg_weight
+
+
+if __name__ == "__main__":
+    test_model = "./model/FC_best.pth"
+    data_path = "./data/dataOut1.mat"
+
+    eeg_weight = inference(data_path, test_model)
+
