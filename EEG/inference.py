@@ -1,6 +1,5 @@
 import torch
 import torch.backends.cudnn as cudnn
-
 from model import SleepModel
 from config import config as cfg
 from train import DataLoad, load_model
