@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scipy.signal import butter, filtfilt
 import numpy as np
 import scipy.io as scio
@@ -18,6 +21,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order):
 
 
 def get_abtd(dataFile):
+    print(f"\n\n{os.path.dirname(__file__)}\n")
     data = scio.loadmat(dataFile)
     #print(data.keys())
     #print(data['temp'][1:,:])

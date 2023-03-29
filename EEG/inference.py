@@ -1,3 +1,8 @@
+import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# import pdb; pdb.set_trace()
 import torch
 import torch.backends.cudnn as cudnn
 from model import SleepModel
@@ -65,6 +70,7 @@ def get_fatigue_weight(count, weight_type):
 
 
 def inference(data_path, test_model):
+    os.system("pwd")
     model, infer_data = get_infer_data(data_path, test_model)
     model.eval()
     output = model(infer_data.float())
