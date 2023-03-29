@@ -25,6 +25,16 @@ def parse_args():
                         help="start index of the facial landmarks for the mouth")
     parser.add_argument("--mEnd", type=int, default=68,
                         help="end index of the facial landmarks for the mouth")
+    parser.add_argument("--yawn_weight", type=float, default=1.,
+                        help="yawn weight")
+    parser.add_argument("--open_too_long_weight", type=float, default=3.,
+                        help="eye open too long weight")        
+    parser.add_argument("--close_too_long_flag", type=float, default=2.,
+                        help="eye close too long weight")             
+    parser.add_argument("--close_count_weight", type=float, default=0.1,
+                        help="eye close count weight") 
+    parser.add_argument("--weight_bias", type=float, default=0.5,
+                        help="eye close count weight")
 
     return parser.parse_args()
 
@@ -86,6 +96,7 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         # Draw text if mouth is open
         if mar > args.MAR_THRESH:
+            yawn_flag = 1
             cv2.putText(frame, "Yawn!", (300, 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if Mouse_flag:
@@ -96,6 +107,16 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
                 Mouse_flag = True
                 pyautogui.sleep(0.5)
                 # pyautogui.mouseDown()
+
+    return yawn_flag, Mouse_flag
+
+
+def get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args):
+    eye_weight =    args.weight_bias + \
+                    yawn_flag * args.yawn_weight + open_too_long_flag * args.open_too_long_weight + \
+                    close_too_long_flag * args.close_too_long_weight + close_count * args.close_count_weight 
+
+    return eye_weight
 
 
 def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False):
@@ -120,7 +141,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
         right_pupil = gaze.pupil_right_coords()
 
         if landmark_points:
-            get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
+            yawn_flag, Mouse_flag = get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
 
 
         if left_pupil != None and right_pupil != None:
@@ -136,6 +157,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
                 # pyautogui.sleep(0.5)
 
             if time.time() - click_time > 10:
+                open_too_long_flag = 1
                 cv2.putText(frame, "Eyes Open too long!", (200, 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
 
@@ -146,6 +168,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
             close_count += 1
             Mouse_message = "Not Painting"
             if close_count > 10:
+                close_too_long_flag = 1
                 cv2.putText(frame, "Eyes Closed too long!", (100, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
                 click_time = time.time()
@@ -155,10 +178,13 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
         else:
             Mouse_message = "Not Painting" 
 
+        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args)
+
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"Watch Time: {(time.time() - click_time):.3f} s", (20, 280), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         # cv2.line(frame, left_pupil, right_pupil, (0,0,255), 1, 8)
         cv2.imshow('Eye Controlled Mouse', frame)
         cv2.waitKey(1)
