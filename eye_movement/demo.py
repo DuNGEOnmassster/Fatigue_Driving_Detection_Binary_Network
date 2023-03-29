@@ -29,10 +29,13 @@ def parse_args():
     return parser.parse_args()
 
 
-def eye_init():
+def eye_init(outcall):
     args = parse_args()
     gaze = GazeTracking()
     webcam = cv2.VideoCapture(0)
+
+    if outcall:
+        args.model_path = "./eye_movement/gaze_tracking/trained_models/shape_predictor_68_face_landmarks.dat"
 
     face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
     screen_w, screen_h = pyautogui.size()
@@ -43,6 +46,7 @@ def eye_init():
     close_count = 0
     Mouse_flag = False
     click_time = time.time()
+
     return args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time
 
 
@@ -94,8 +98,8 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
                 # pyautogui.mouseDown()
 
 
-def eye_movement_process():
-    args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init()
+def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False):
+    args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
     while True:
         text = ""
         _, frame = webcam.read()
