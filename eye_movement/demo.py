@@ -29,12 +29,17 @@ def parse_args():
                         help="yawn weight")
     parser.add_argument("--open_too_long_weight", type=float, default=3.,
                         help="eye open too long weight")        
-    parser.add_argument("--close_too_long_flag", type=float, default=2.,
+    parser.add_argument("--close_too_long_weight", type=float, default=2.,
                         help="eye close too long weight")             
     parser.add_argument("--close_count_weight", type=float, default=0.1,
                         help="eye close count weight") 
     parser.add_argument("--weight_bias", type=float, default=0.5,
                         help="eye close count weight")
+
+    parser.add_argument("--whole_eeg_weight", type=float, default=1.,
+                        help="eeg weight")
+    parser.add_argument("--whole_eye_weight", type=float, default=1.,
+                        help="eye movement weight")
 
     return parser.parse_args()
 
@@ -62,6 +67,7 @@ def eye_init(outcall):
 
 def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time):
     landmarks = landmark_points[0].landmark
+    yawn_flag = 0
     for id, landmark in enumerate(landmarks[474:478]):
         x = int(landmark.x * frame_w)
         y = int(landmark.y * frame_h)
@@ -114,13 +120,22 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
 def get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args):
     eye_weight =    args.weight_bias + \
                     yawn_flag * args.yawn_weight + open_too_long_flag * args.open_too_long_weight + \
-                    close_too_long_flag * args.close_too_long_weight + close_count * args.close_count_weight 
+                    close_too_long_flag * args.close_too_long_weight + close_too_long_flag * close_count * args.close_count_weight 
 
     return eye_weight
 
 
+def get_all_weight(eye_weight, eeg_weight, args):
+    whole_weight = eye_weight * args.whole_eye_weight + eeg_weight * args.whole_eeg_weight + args.weight_bias
+    
+    return whole_weight
+
+
 def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
+    open_too_long_flag = 0
+    close_too_long_flag = 0
+    yawn_flag = 0
     while True:
         text = ""
         _, frame = webcam.read()
@@ -179,12 +194,19 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
             Mouse_message = "Not Painting" 
 
         eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args)
+        whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"Watch Time: {(time.time() - click_time):.3f} s", (20, 280), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
-        cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+
+        cv2.putText(frame, f"EEG: {eeg_weight:.3f}", (500, 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, f"Eye: {eye_weight:.3f}", (360, 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, f"Whole: {whole_weight:.3f}", (200, 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         # cv2.line(frame, left_pupil, right_pupil, (0,0,255), 1, 8)
         cv2.imshow('Eye Controlled Mouse', frame)
         cv2.waitKey(1)

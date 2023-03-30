@@ -81,6 +81,7 @@ def inference(data_path, test_model):
     # print(count)
     eeg_weight = get_fatigue_weight(count, "Select")
     print(eeg_weight)
+    # import pdb; pdb.set_trace()
     return eeg_weight
 
 

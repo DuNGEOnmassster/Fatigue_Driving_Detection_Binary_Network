@@ -49,7 +49,7 @@ def get_abtd(dataFile):
         print(i, arr)
         arr_set.append(arr)
 
-    arr_set = torch.from_numpy(np.array(arr_set))
+    arr_set = torch.from_numpy(np.array(arr_set)) # shape = tensor(129,4)
     # import pdb; pdb.set_trace()
 
     return arr_set
