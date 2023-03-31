@@ -29,6 +29,8 @@ def parse_args():
                         help="yawn weight")
     parser.add_argument("--open_too_long_weight", type=float, default=3.,
                         help="eye open too long weight")        
+    parser.add_argument("--open_too_long_time_weight", type=float, default=0.1,
+                        help="eye open too long time weight")
     parser.add_argument("--close_too_long_weight", type=float, default=2.,
                         help="eye close too long weight")             
     parser.add_argument("--close_count_weight", type=float, default=0.1,
@@ -117,9 +119,9 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
     return yawn_flag, Mouse_flag
 
 
-def get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args):
-    eye_weight =    args.weight_bias + \
-                    yawn_flag * args.yawn_weight + open_too_long_flag * args.open_too_long_weight + \
+def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args):
+    eye_weight =    args.weight_bias + yawn_flag * args.yawn_weight + \
+                    open_too_long_flag * args.open_too_long_weight + open_too_long_time * args.open_too_long_time_weight +\
                     close_too_long_flag * args.close_too_long_weight + close_too_long_flag * close_count * args.close_count_weight 
 
     return eye_weight
@@ -136,6 +138,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
     open_too_long_flag = 0
     close_too_long_flag = 0
     yawn_flag = 0
+    open_too_long_time = 0
     while True:
         text = ""
         _, frame = webcam.read()
@@ -173,7 +176,8 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
 
             if time.time() - click_time > 10:
                 open_too_long_flag = 1
-                cv2.putText(frame, "Eyes Open too long!", (200, 20),
+                open_too_long_time = time.time() - click_time
+                cv2.putText(frame, "Eyes Open too long!", (200, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
 
                     
@@ -184,7 +188,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
             Mouse_message = "Not Painting"
             if close_count > 10:
                 close_too_long_flag = 1
-                cv2.putText(frame, "Eyes Closed too long!", (100, 20),
+                cv2.putText(frame, "Eyes Closed too long!", (40, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
                 click_time = time.time()
         
@@ -193,7 +197,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
         else:
             Mouse_message = "Not Painting" 
 
-        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, close_too_long_flag, close_count, args)
+        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
