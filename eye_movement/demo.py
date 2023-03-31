@@ -135,11 +135,11 @@ def get_all_weight(eye_weight, eeg_weight, args):
 
 def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
-    open_too_long_flag = 0
-    close_too_long_flag = 0
-    yawn_flag = 0
-    open_too_long_time = 0
     while True:
+        open_too_long_flag = 0
+        close_too_long_flag = 0
+        yawn_flag = 0
+        open_too_long_time = 0
         text = ""
         _, frame = webcam.read()
         frame = cv2.flip(frame, 1)
