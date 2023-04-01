@@ -37,4 +37,4 @@ if __name__ == "__main__":
     data_path, update_eeg_weight = get_data(dataset_path)
     model = prepare_model(test_model)
     data_path = "./EEG/data/dataOut4.mat"
-    eye_movement_process(inference_func=inference, data_path=data_path, model=model, update_eeg_weight=update_eeg_weight, outcall=True)
+    eye_movement_process(inference_func=inference, dataset_path=dataset_path, model=model, update_eeg_weight=update_eeg_weight, outcall=True)

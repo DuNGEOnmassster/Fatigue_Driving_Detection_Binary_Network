@@ -119,6 +119,17 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
     return yawn_flag, Mouse_flag
 
 
+def get_data(dataset_path, count):
+    # Return real-time-updated Output.mat path in `dataset_path`
+    # Return Boolean Flag `update_eeg_weight`, if Output.mat updates, Flag = True; else Flag = Flase
+    data_path = f"{dataset_path}default.mat"
+    if os.path.exists(f"{dataset_path}dataOut{count}.mat"):
+        data_path = f"{dataset_path}dataOut{count}.mat"
+        count += 1
+        
+    return data_path, count
+
+
 def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args):
     eye_weight =    args.weight_bias + yawn_flag * args.yawn_weight + \
                     open_too_long_flag * args.open_too_long_weight + open_too_long_time * args.open_too_long_time_weight +\
@@ -127,10 +138,11 @@ def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_
     return eye_weight
 
 
-def get_eeg_weight(inference_func, data_path, model):
+def get_eeg_weight(inference_func, dataset_path, model, count):
+    data_path, count = get_data(dataset_path, count)
     eeg_weight =    inference_func(data_path, model)
 
-    return eeg_weight
+    return eeg_weight, count
 
 def get_all_weight(eye_weight, eeg_weight, args):
     whole_weight = eye_weight * args.whole_eye_weight + eeg_weight * args.whole_eeg_weight + args.weight_bias
@@ -138,8 +150,9 @@ def get_all_weight(eye_weight, eeg_weight, args):
     return whole_weight
 
 
-def eye_movement_process(inference_func, data_path, model, eeg_weight=None, update_eeg_weight=None, outcall=False):
+def eye_movement_process(inference_func, dataset_path, model, eeg_weight=None, update_eeg_weight=None, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
+    count = 1
     while True:
         open_too_long_flag = 0
         close_too_long_flag = 0
@@ -203,13 +216,14 @@ def eye_movement_process(inference_func, data_path, model, eeg_weight=None, upda
             Mouse_message = "Not Painting" 
 
         eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
-        eeg_weight = get_eeg_weight(inference_func, data_path, model)
+        eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, count)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"Watch Time: {(time.time() - click_time):.3f} s", (20, 280), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"Count: {count}", (20, 360), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
 
         cv2.putText(frame, f"EEG: {eeg_weight:.3f}", (500, 20), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
