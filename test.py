@@ -10,12 +10,6 @@ from EEG.config import config as cfg
 
 import torch.backends.cudnn as cudnn
 
-def get_data(dataset_path):
-    # Return real-time-updated Output.mat path in `dataset_path`
-    # Return Boolean Flag `update_eeg_weight`, if Output.mat updates, Flag = True; else Flag = Flase
-
-    return None, None
-
 
 def prepare_model(test_model):
     model = SleepModel(5, is_training=True)
@@ -34,7 +28,6 @@ if __name__ == "__main__":
     test_model = "./EEG/model/FC_best.pth"
     dataset_path = "./EEG/data/"
 
-    data_path, update_eeg_weight = get_data(dataset_path)
     model = prepare_model(test_model)
-    data_path = "./EEG/data/dataOut4.mat"
-    eye_movement_process(inference_func=inference, dataset_path=dataset_path, model=model, update_eeg_weight=update_eeg_weight, outcall=True)
+
+    eye_movement_process(inference_func=inference, dataset_path=dataset_path, model=model, outcall=True)

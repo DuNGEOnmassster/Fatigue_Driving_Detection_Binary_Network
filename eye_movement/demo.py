@@ -150,7 +150,7 @@ def get_all_weight(eye_weight, eeg_weight, args):
     return whole_weight
 
 
-def eye_movement_process(inference_func, dataset_path, model, eeg_weight=None, update_eeg_weight=None, outcall=False):
+def eye_movement_process(inference_func, dataset_path, model, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
     count = 1
     while True:
