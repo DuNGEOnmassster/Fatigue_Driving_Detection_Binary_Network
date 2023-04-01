@@ -11,25 +11,18 @@ from train import DataLoad, load_model
 from util.bo_classify import get_abtd
 
 ## inference
-def get_infer_data(data_path, test_model):
+def get_infer_data(data_path):
     # all_data = DataLoad()
     # test_data = torch.from_numpy(all_data.test_data).float().to(cfg.device)
     test_data = get_abtd(data_path)
 
     # print(test_data.shape)
-    model = SleepModel(5, is_training=True)
 
-    model = model.to(cfg.device)
-    if cfg.cuda:
-        cudnn.benchmark = True
-
-    if cfg.resume:
-        load_model(model, test_model)
 
     # test_data = test_data[-1:, 1:]
     # import pdb; pdb.set_trace()
 
-    return model, test_data
+    return test_data
 
 
 def pred_count(pred_test):
@@ -69,9 +62,9 @@ def get_fatigue_weight(count, weight_type):
     return weight
 
 
-def inference(data_path, test_model):
+def inference(data_path, model):
     os.system("pwd")
-    model, infer_data = get_infer_data(data_path, test_model)
+    infer_data = get_infer_data(data_path)
     model.eval()
     output = model(infer_data.float())
     # print(output.shape)
@@ -80,7 +73,7 @@ def inference(data_path, test_model):
     count = pred_count(pred_test)
     # print(count)
     eeg_weight = get_fatigue_weight(count, "Select")
-    print(eeg_weight)
+    # print(eeg_weight)
     # import pdb; pdb.set_trace()
     return eeg_weight
 

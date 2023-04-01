@@ -21,7 +21,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order):
 
 
 def get_abtd(dataFile):
-    print(f"\n\n{os.path.dirname(__file__)}\n")
+    # print(f"\n\n{os.path.dirname(__file__)}\n")
     data = scio.loadmat(dataFile)
     #print(data.keys())
     #print(data['temp'][1:,:])
@@ -46,7 +46,7 @@ def get_abtd(dataFile):
         d= butter_bandpass_filter(data4[:,split_set[i-1]:split_set[i]], 0.5, 4, fs, 1)
         d = np.mean(np.abs(d))
         arr = np.array([a, b, t, d])
-        print(i, arr)
+        # print(i, arr)
         arr_set.append(arr)
 
     arr_set = torch.from_numpy(np.array(arr_set)) # shape = tensor(129,4)

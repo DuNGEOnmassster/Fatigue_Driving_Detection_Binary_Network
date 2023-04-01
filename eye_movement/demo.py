@@ -127,13 +127,18 @@ def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_
     return eye_weight
 
 
+def get_eeg_weight(inference_func, data_path, model):
+    eeg_weight =    inference_func(data_path, model)
+
+    return eeg_weight
+
 def get_all_weight(eye_weight, eeg_weight, args):
     whole_weight = eye_weight * args.whole_eye_weight + eeg_weight * args.whole_eeg_weight + args.weight_bias
     
     return whole_weight
 
 
-def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False):
+def eye_movement_process(inference_func, data_path, model, eeg_weight=None, update_eeg_weight=None, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
     while True:
         open_too_long_flag = 0
@@ -198,6 +203,7 @@ def eye_movement_process(eeg_weight=None, update_eeg_weight=None, outcall=False)
             Mouse_message = "Not Painting" 
 
         eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
+        eeg_weight = get_eeg_weight(inference_func, data_path, model)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
