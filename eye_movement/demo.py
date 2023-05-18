@@ -42,6 +42,8 @@ def parse_args():
                         help="eeg weight")
     parser.add_argument("--whole_eye_weight", type=float, default=1.,
                         help="eye movement weight")
+    parser.add_argument("--fatigue_threshold",type=float, default=3.5,
+                        help="Whole fatigue threshold")
 
     return parser.parse_args()
 
@@ -210,14 +212,19 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
                 click_time = time.time()
         
-        if Mouse_flag:
-            Mouse_message = "Painting"
-        else:
-            Mouse_message = "Not Painting" 
+        # if Mouse_flag:
+        #     Mouse_message = "Painting"
+        # else:
+        #     Mouse_message = "Not Painting" 
 
         eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
         eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, count)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
+
+        if whole_weight > args.fatigue_threshold:
+            Mouse_message = "Detect Fatigue!"
+        else:
+            Mouse_message = ""        
 
         cv2.putText(frame, text, (90, 100), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2)
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
