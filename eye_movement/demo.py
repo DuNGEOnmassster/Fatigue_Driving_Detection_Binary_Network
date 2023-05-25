@@ -140,8 +140,8 @@ def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_
     return eye_weight
 
 
-def get_eeg_weight(inference_func, dataset_path, model, count):
-    data_path, count = get_data(dataset_path, count)
+def get_eeg_weight(inference_func, dataset_path, model, eeg_count):
+    data_path, count = get_data(dataset_path, eeg_count)
     eeg_weight =    inference_func(data_path, model)
 
     return eeg_weight, count
@@ -154,7 +154,7 @@ def get_all_weight(eye_weight, eeg_weight, args):
 
 def eye_movement_process(inference_func, dataset_path, model, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
-    count = 1
+    eeg_count = 1
     while True:
         open_too_long_flag = 0
         close_too_long_flag = 0
@@ -218,7 +218,7 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         #     Mouse_message = "Not Painting" 
 
         eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
-        eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, count)
+        eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, eeg_count)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         if whole_weight > args.fatigue_threshold:
