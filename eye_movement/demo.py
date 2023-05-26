@@ -37,7 +37,7 @@ def parse_args():
                         help="eye close count weight") 
     parser.add_argument("--weight_bias", type=float, default=0.5,
                         help="eye close count weight")
-    parser.add_argument("--focus_threshold", type=int, default=15,
+    parser.add_argument("--focus_threshold", type=int, default=10,
                         help="eye focus too long threshold")
     parser.add_argument("--focus_weight", type=float, default=1.,
                         help="focus too long weight")
