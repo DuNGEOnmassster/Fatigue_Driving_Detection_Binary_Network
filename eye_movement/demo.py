@@ -37,6 +37,10 @@ def parse_args():
                         help="eye close count weight") 
     parser.add_argument("--weight_bias", type=float, default=0.5,
                         help="eye close count weight")
+    parser.add_argument("--focus_threshold", type=int, default=15,
+                        help="eye focus too long threshold")
+    parser.add_argument("--focus_weight", type=float, default=1.,
+                        help="focus too long weight")
 
     parser.add_argument("--whole_eeg_weight", type=float, default=1.,
                         help="eeg weight")
@@ -118,7 +122,7 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
                 pyautogui.sleep(0.5)
                 # pyautogui.mouseDown()
 
-    return yawn_flag, Mouse_flag
+    return yawn_flag, Mouse_flag, rects
 
 
 def get_data(dataset_path, count):
@@ -132,16 +136,17 @@ def get_data(dataset_path, count):
     return data_path, count
 
 
-def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args):
+def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, args):
     eye_weight =    args.weight_bias + yawn_flag * args.yawn_weight + \
                     open_too_long_flag * args.open_too_long_weight + open_too_long_time * args.open_too_long_time_weight +\
-                    close_too_long_flag * args.close_too_long_weight + close_too_long_flag * close_count * args.close_count_weight 
+                    close_too_long_flag * args.close_too_long_weight + close_too_long_flag * close_count * args.close_count_weight  +\
+                    focus_flag * args.focus_weight
 
     return eye_weight
 
 
-def get_eeg_weight(inference_func, dataset_path, model, eeg_count):
-    data_path, count = get_data(dataset_path, eeg_count)
+def get_eeg_weight(inference_func, dataset_path, model, count):
+    data_path, count = get_data(dataset_path, count)
     eeg_weight =    inference_func(data_path, model)
 
     return eeg_weight, count
@@ -154,10 +159,13 @@ def get_all_weight(eye_weight, eeg_weight, args):
 
 def eye_movement_process(inference_func, dataset_path, model, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
-    eeg_count = 1
+    count = 1
+    last_rects = None
+    focus_count = 0
     while True:
         open_too_long_flag = 0
         close_too_long_flag = 0
+        focus_flag = 0
         yawn_flag = 0
         open_too_long_time = 0
         text = ""
@@ -179,8 +187,14 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         right_pupil = gaze.pupil_right_coords()
 
         if landmark_points:
-            yawn_flag, Mouse_flag = get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
+            yawn_flag, Mouse_flag, rects = get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
 
+        if rects == last_rects:
+            focus_count += 1
+        else:
+            focus_count = 0
+
+        last_rects = rects
 
         if left_pupil != None and right_pupil != None:
             close_count = 0
@@ -199,7 +213,11 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
                 open_too_long_time = time.time() - click_time
                 cv2.putText(frame, "Eyes Open too long!", (200, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
-
+                
+            if focus_count > args.focus_threshold:
+                focus_flag = 1
+                cv2.putText(frame, "Eyes Focus too long!", (200, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
                     
         else:
             cv2.putText(frame, "Eyes Closed!", (0, 20),
@@ -217,8 +235,8 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         # else:
         #     Mouse_message = "Not Painting" 
 
-        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, args)
-        eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, eeg_count)
+        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, args)
+        eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, count)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
         if whole_weight > args.fatigue_threshold:
@@ -230,7 +248,8 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         cv2.putText(frame, f"{Mouse_message}", (90, 160), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"{close_count}", (90, 220), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
         cv2.putText(frame, f"Watch Time: {(time.time() - click_time):.3f} s", (20, 280), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
-        cv2.putText(frame, f"Count: {count}", (20, 360), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"EEG Count: {count}", (20, 360), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
+        cv2.putText(frame, f"Focus Count: {focus_count}", (20, 400), cv2.FONT_HERSHEY_DUPLEX, 1.6, (127,0,224), 1)
 
         cv2.putText(frame, f"EEG: {eeg_weight:.3f}", (500, 20), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
