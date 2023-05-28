@@ -12,6 +12,7 @@ import argparse
 from imutils import face_utils
 from gaze_tracking.mouth import mouth_aspect_ratio
 import time
+import math
 
 
 def parse_args():
@@ -73,7 +74,7 @@ def eye_init(outcall):
     return args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time
 
 
-def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time):
+def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time, last_x, last_y):
     landmarks = landmark_points[0].landmark
     yawn_flag = 0
     for id, landmark in enumerate(landmarks[474:478]):
@@ -85,6 +86,12 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
             screen_x = screen_w * landmark.x
             screen_y = screen_h * landmark.y
             # pyautogui.moveTo(screen_x, screen_y)
+            print(f"screen_x = {screen_x}, screen_y = {screen_y}")
+            print(f"last_x = {last_x}, last_y = {last_y}")
+            if abs(screen_x - last_x) <= 20 and abs(screen_y - last_y) <= 20:
+                detect_focus = True
+            else:
+                detect_focus = False
 
     left = [landmarks[145], landmarks[159]]
     for landmark in left:
@@ -122,7 +129,7 @@ def get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray,
                 pyautogui.sleep(0.5)
                 # pyautogui.mouseDown()
 
-    return yawn_flag, Mouse_flag, rects
+    return yawn_flag, Mouse_flag, rects, screen_x, screen_y, detect_focus
 
 
 def get_data(dataset_path, count):
@@ -161,6 +168,8 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
     args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time = eye_init(outcall)
     count = 1
     last_rects = None
+    last_screen_x = 0.
+    last_screen_y = 0.
     focus_count = 0
     while True:
         open_too_long_flag = 0
@@ -187,10 +196,17 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         right_pupil = gaze.pupil_right_coords()
 
         if landmark_points:
-            yawn_flag, Mouse_flag, rects = get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time)
+            yawn_flag, Mouse_flag, rects, screen_x, screen_y, detect_focus = get_general_landmarks(landmark_points, frame, frame_w, frame_h, rects, gray, args, gaze, webcam, face_mesh, screen_w, screen_h, detector, predictor, click_flag, close_count, Mouse_flag, click_time, last_screen_x, last_screen_y)
+            last_screen_x = screen_x
+            last_screen_y = screen_y
+            # import pdb; pdb.set_trace()
 
         if rects == last_rects:
-            focus_count += 1
+            if detect_focus:
+                focus_count += 1
+            
+            else:
+                focus_count = 0
         else:
             focus_count = 0
 
