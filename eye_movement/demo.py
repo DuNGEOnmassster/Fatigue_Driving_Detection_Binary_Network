@@ -42,6 +42,8 @@ def parse_args():
                         help="eye focus too long threshold")
     parser.add_argument("--focus_weight", type=float, default=1.,
                         help="focus too long weight")
+    parser.add_argument("--focus_count_weight", type=float, default=0.1,
+                        help="focus too long count weight")
 
     parser.add_argument("--whole_eeg_weight", type=float, default=1.,
                         help="eeg weight")
@@ -143,11 +145,11 @@ def get_data(dataset_path, count):
     return data_path, count
 
 
-def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, args):
+def get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, focus_count, args):
     eye_weight =    args.weight_bias + yawn_flag * args.yawn_weight + \
                     open_too_long_flag * args.open_too_long_weight + open_too_long_time * args.open_too_long_time_weight +\
                     close_too_long_flag * args.close_too_long_weight + close_too_long_flag * close_count * args.close_count_weight  +\
-                    focus_flag * args.focus_weight
+                    focus_flag * args.focus_weight + focus_flag * focus_count * args.focus_count_weight
 
     return eye_weight
 
