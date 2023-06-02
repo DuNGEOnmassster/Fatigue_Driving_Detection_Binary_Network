@@ -1,0 +1,253 @@
+﻿DATA_PARAMETERS START
+   DataGuid             = {0B86B22B-1A49-411A-9657-4A4BDA3D3ED8}
+   CurrentSessionLabel  = 
+   DataByteOrder        = INTEL
+   DataSampOrder        = SAMP
+   AmplifierInfo        = SynAmpsRT, LP-Filter: order 2 Butterworth (Configuration: 64 channels)
+   Comments             = 
+   FileHistory          = 
+   FileVersion          =  800
+   NumSessions          =  0
+   CurrentSession       =  0
+   DataFormat           =  6
+   FrequencyDomain      =  0
+   NumSamples           =  1572864
+   NumTrials            =  1
+   NumChannels          =  65
+   NumGroups            =  2
+   NumMagGroups         =  0
+   NumElGroups          =  1
+   NumLinesSkip         =  0
+   NumColumnsSkip       =  0
+   DecimalSymbol        =  0
+   StartYear            =  0
+   StartMonth           =  0
+   StartDay             =  0
+   StartHour            = -1
+   StartMin             =  0
+   StartSec             =  0
+   StartMillisec        =  0
+   StartOffsetUTCMin    =  519
+   SampleTimeUsec       =  1000
+   SampleFreqHz         =  1000
+   TriggerOffsetUsec    =  0
+   TriggerOffsetHz      =  0
+DATA_PARAMETERS END
+
+DEVICE_PARAMETERS START
+   DataUnit             = uV
+   NumChanThisGroup     =  64
+   NumSensorsThisGroup  =  64
+   CommonOffset         =  0
+   NumRefChannels       =  0
+   CommonScale          =  1
+DEVICE_PARAMETERS END
+
+DEVICE_PARAMETERS_OTHERS START
+   DataUnit             = uV
+   NumChanThisGroup     =  1
+   NumSensorsThisGroup  =  1
+   CommonOffset         =  0
+   NumRefChannels       =  0
+   CommonScale          =  1
+DEVICE_PARAMETERS_OTHERS END
+
+LABELS START
+   ListDescription      = SensorLabels
+   ListUnits            = 
+   ListNrColumns        =  260
+   ListNrRows           =  64
+   ListNrTimepts        =  1
+   ListNrBlocks         =  1
+   ListBinary           =  0
+   ListType             =  5
+   ListTrafoType        =  0
+   ListGridType         =  2
+   ListFirstColumn      =  1
+   ListIndexMin         = -1
+   ListIndexMax         = -1
+   ListIndexAbsMax      = -1
+LABELS END
+
+LABELS START_LIST	# Do not edit!
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+LABELS END_LIST
+
+GEOMETRY START
+   HelmetSystem         =  0
+   PlanarSensors        =  0
+   SensorShape          = -1
+   SensorOrder          =  0
+   SensorStatus         =  0
+   SensorDiameterXMm    =  10
+   SensorDiameterYMm    =  10
+GEOMETRY END
+
+SENSORS START
+   ListDescription      = Sensors
+   ListUnits            = mm
+   ListNrColumns        =  3
+   ListNrRows           =  64
+   ListNrTimepts        =  1
+   ListNrBlocks         =  1
+   ListBinary           =  0
+   ListType             =  1
+   ListTrafoType        =  0
+   ListGridType         =  2
+   ListFirstColumn      =  1
+   ListIndexMin         = -1
+   ListIndexMax         = -1
+   ListIndexAbsMax      = -1
+SENSORS END
+
+SENSORS START_LIST	# Do not edit!
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+  0	 0	 0
+SENSORS END_LIST
+
+LABELS_OTHERS START
+   ListDescription      = SensorLabels
+   ListUnits            = 
+   ListNrColumns        =  260
+   ListNrRows           =  1
+   ListNrTimepts        =  1
+   ListNrBlocks         =  1
+   ListBinary           =  0
+   ListType             =  5
+   ListTrafoType        =  0
+   ListGridType         =  2
+   ListFirstColumn      =  1
+   ListIndexMin         = -1
+   ListIndexMax         = -1
+   ListIndexAbsMax      = -1
+LABELS_OTHERS END
+
+LABELS_OTHERS START_LIST	# Do not edit!
+Trigger
+LABELS_OTHERS END_LIST
+
