@@ -253,7 +253,7 @@ def eye_movement_process(inference_func, dataset_path, model, outcall=False):
         # else:
         #     Mouse_message = "Not Painting" 
 
-        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, args)
+        eye_weight = get_eye_weight(yawn_flag, open_too_long_flag, open_too_long_time, close_too_long_flag, close_count, focus_flag, focus_count, args)
         eeg_weight, count = get_eeg_weight(inference_func, dataset_path, model, count)
         whole_weight = get_all_weight(eye_weight, eeg_weight, args)
 
